@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test": "node --test",
     "start": "node index.js",
     "dev": "nodemon index.js && node fileWatcher.js",
     "build": "vite build",
