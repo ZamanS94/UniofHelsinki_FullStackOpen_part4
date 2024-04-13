@@ -244,6 +244,7 @@ test('when author with maximum likes has been returned', () => {
         demoType[key] = typeof demoObject[key]()
         resultType[key] = typeof result[key]
     }
+    
     assert.deepStrictEqual(demoType, resultType)
 })
 })
