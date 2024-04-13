@@ -30,6 +30,21 @@ export const favoriteBlog = (blogs) => {
   }
   }
 
+export const mostBlogs = (blogs) => {
+    const groupAuthors = _.groupBy(blogs, 'author')
+    const blogsByAuthor = _.mapValues(groupAuthors, blogs => {
+        return blogs.length
+    })
+
+    const maxBlogs = _.max(_.values(blogsByAuthor))
+    const maxAuthor = _.findKey(blogsByAuthor, author => author === maxBlogs)
+
+    return {
+        author: maxAuthor,
+        blogs: maxBlogs
+}
+}
+
 export const mostLikes = (blogs) => {
     const groupAuthors = _.groupBy(blogs, 'author')
     const likesAuthors = _.mapValues(groupAuthors, blogs => {
@@ -44,5 +59,7 @@ export const mostLikes = (blogs) => {
         likes: maxLikes
     }
 }
+
+
 
 

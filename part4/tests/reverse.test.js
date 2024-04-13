@@ -2,7 +2,7 @@ import { test,describe } from 'node:test'
 import assert from 'node:assert'
 
 
-import {dummy,totalLikes,favoriteBlog,mostLikes} from '../utils/list_helper.js'
+import {dummy,totalLikes,favoriteBlog,mostLikes,mostBlogs} from '../utils/list_helper.js'
 
 /*
 import { reverse} from '../utils/for_testing.js'
@@ -232,16 +232,35 @@ describe('test of authors is going on', () => {
 
     const demoObject = {
         author: String,
+        blogs: Number
+    }
+
+    const demoObject2 = {
+        author: String,
         likes: Number
     }
 
 let demoType = []
 let resultType = []
 
-test('when author with maximum likes has been returned', () => {
-    const result = mostLikes(listWithMulBlog)
+test('when author with maximum blogs has been returned', () => {
+    const result = mostBlogs(listWithMulBlog)
     for (const key in demoObject) {
         demoType[key] = typeof demoObject[key]()
+        resultType[key] = typeof result[key]
+    }
+
+    assert.deepStrictEqual(demoType, resultType)
+})
+
+demoType = []
+resultType = []
+
+
+test('when author with maximum likes has been returned', () => {
+    const result = mostLikes(listWithMulBlog)
+    for (const key in demoObject2) {
+        demoType[key] = typeof demoObject2[key]()
         resultType[key] = typeof result[key]
     }
 
