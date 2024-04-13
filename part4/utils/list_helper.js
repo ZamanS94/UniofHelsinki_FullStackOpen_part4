@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 export const dummy = (blogs) => {
     return 1
 }
@@ -27,4 +29,17 @@ export const favoriteBlog = (blogs) => {
     likes: favoriteBlog.likes
   }
   }
+
+export const mostBlogs = (blogs) => {
+    const groupAuthors = _.groupBy(blogs, 'author')
+    const likesAuthors = _.mapValues(groupAuthors, blogs => {
+        return _.sumBy(blogs, 'likes')
+    })
+    const maxAuthor = _.maxBy(_.keys(likesAuthors), author => likesAuthors[author])
+
+    return {
+        author: maxAuthor,
+        likes: likesAuthors
+    }
+}
 
