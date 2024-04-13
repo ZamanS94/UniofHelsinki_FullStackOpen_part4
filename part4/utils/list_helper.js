@@ -30,16 +30,19 @@ export const favoriteBlog = (blogs) => {
   }
   }
 
-export const mostBlogs = (blogs) => {
+export const mostLikes = (blogs) => {
     const groupAuthors = _.groupBy(blogs, 'author')
     const likesAuthors = _.mapValues(groupAuthors, blogs => {
         return _.sumBy(blogs, 'likes')
     })
-    const maxAuthor = _.maxBy(_.keys(likesAuthors), author => likesAuthors[author])
+
+    const maxLikes = _.max(_.values(likesAuthors))
+    const maxAuthor = _.findKey(likesAuthors, author => author === maxLikes)
 
     return {
         author: maxAuthor,
-        likes: likesAuthors
+        likes: maxLikes
     }
 }
+
 
