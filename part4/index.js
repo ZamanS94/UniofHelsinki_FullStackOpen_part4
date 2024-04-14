@@ -1,16 +1,8 @@
-import express from 'express'
-import cors from 'cors'
-import { connectToDatabase } from './blogDatabaseConnection.js'
-import { setupRoutes } from './blogRoutes.js'
+import app from './app.js'
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+import config from './utils/config.js'
+import {info} from './utils/logger.js'
 
-connectToDatabase()
-setupRoutes(app)
-
-const PORT = 3001
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+app.listen(config.PORT, () => {
+  info(`Server running on port ${config.PORT}`)
 })
