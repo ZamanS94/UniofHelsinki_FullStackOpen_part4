@@ -16,14 +16,17 @@ router.get('/', async (request, response) => {
   })
   
 router.post('/api/blogs', (request, response) => {
-  const blog = new Blog(request.body)
-  blog
-    .save()
-    .then(result => {
-      response.status(201).json(result)
-    })
+    const { title, url } = request.body
+    if (!title || !url) {
+      return response.status(400).json({ error: "Title or URL is missing" })
+    }
+    const blog = new Blog(request.body)
+    blog.save()
+      .then(result => {
+        response.status(201).json(result)
+      })
 })
-
+  
 export const setupRoutes = (app) => {
   app.use(router)
 }

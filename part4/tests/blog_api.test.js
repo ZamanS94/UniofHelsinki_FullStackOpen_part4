@@ -78,6 +78,33 @@ test('posting new blog without like is being tested',async () => {
 })
 
 
+test('testing for bad request', async () => {
+  const noTitle = {
+    "author": "Arthur Conan Doyle",
+    "url": "https://sherlockholmes.com",
+    "likes":100
+  }
+
+  const noUrl = {
+    "title": "The Adventures of Sherlock Holmes",
+    "author": "Arthur Conan Doyle",
+    "likes":100
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(noTitle)
+    .expect(400)
+
+  await api
+    .post('/api/blogs')
+    .send(noUrl)
+    .expect(400)
+})
+
+
+
+
 after(async () => {
   await mongoose.connection.close()
 })
