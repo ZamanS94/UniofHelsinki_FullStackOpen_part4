@@ -112,6 +112,15 @@ test('testing delete', async () => {
   await api.delete(`/api/blogs/3`).expect(204)
 })
 
+test('testing update', async () => {
+  let response = await api.get('/api/blogs')
+  console.log(response.body)
+  await api.put(`/api/blogs/100`).send({ likes: 901 }).expect(404)
+  await api.put(`/api/blogs/3`).send({ likes: 901 }).expect(201)
+  response = await api.get('/api/blogs')
+  console.log(response.body)
+})
+
 
 after(async () => {
   await mongoose.connection.close()

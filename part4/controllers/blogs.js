@@ -33,14 +33,27 @@ router.delete('/api/blogs/:id', async (request, response, next) => {
     console.log(id)
       const deletedBlog= await Blog.findOneAndDelete({ id })
       if (!deletedBlog) {
-        response.status(404).json({ error: "blog was not found" })
+        response.status(404).send("blog was not found" )
       }
       else{
-        response.status(204).json({ error: "blog deleted" })
+        response.status(204).send("blog deleted")
       }
 })
 
-  
+router.put('/api/blogs/:id', async (request, response) => {
+    const id_ = request.params.id
+    const body = request.body
+        const updatedPerson = await Blog.findOneAndUpdate(
+            { id: id_ }, body, { new: true,runValidators: true } 
+        )
+        if (!updatedPerson) {
+            response.status(404).send("blog was not found" )
+        }
+        else{
+            response.status(201).send("blog updated" )
+        }
+})
+
 export const setupRoutes = (app) => {
   app.use(router)
 }
