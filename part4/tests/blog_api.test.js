@@ -39,6 +39,22 @@ test('testing for unique id', async () => {
  assert.strictEqual(nonEqual, true)
 })
 
+
+test('posting new blog is being tested',async () => {
+  const newBlog = {
+    "title": "Sherlock Holmes",
+    "author": "Arthur Conan Doyle",
+    "url": "https://en.wikipedia.org/wiki/Sherlock_Holmes",
+    "likes": 3000
+  }
+  await api
+  .post('/api/blogs')
+  .send(newBlog).expect(201)
+  const response = await api.get('/api/blogs')
+  assert.strictEqual(response.body.length, initialBlogs.length+1)
+})
+
+
 after(async () => {
   await mongoose.connection.close()
 })
