@@ -31,11 +31,11 @@ const nonExistingId = async () => {
 const blogsInDb = async () => {
   const blogs = await Blog.find({})
   return blogs.map(blog => {
-    const nesBlogs = blog.toJSON()
-    nesBlogs.id = nesBlogs._id.toString()
-    delete nesBlogs._id
-    delete nesBlogs.__v
-    return nesBlogs
+    const newBlogs = blog.toJSON()
+    newBlogs.id = newBlogs._id.toString()
+    delete newBlogs._id
+    delete newBlogs.__v
+    return newBlogs
   })
 }
 

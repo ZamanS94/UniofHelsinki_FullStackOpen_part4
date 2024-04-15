@@ -54,6 +54,29 @@ test('posting new blog is being tested',async () => {
   assert.strictEqual(response.body.length, initialBlogs.length+1)
 })
 
+test('posting new blog without like is being tested',async () => {
+  const newBlog = {
+    "title": "Sherlock Holmes",
+    "author": "Arthur Conan Doyle",
+    "url": "https://en.wikipedia.org/wiki/Sherlock_Holmes",
+  }
+
+  if (!Object.keys(newBlog).includes('likes')) {
+    newBlog.likes = 0
+  }
+  await api
+  .post('/api/blogs')
+  .send(newBlog).expect(201)
+  const response = await api.get('/api/blogs')
+  let checkBlog 
+  response.body.forEach(blog => {
+    if (blog.title==newBlog.title){
+    checkBlog=blog}
+  })
+  assert.strictEqual(checkBlog.likes,0)
+  assert.strictEqual(response.body.length, initialBlogs.length+1)
+})
+
 
 after(async () => {
   await mongoose.connection.close()
