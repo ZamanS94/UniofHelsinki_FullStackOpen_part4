@@ -1,15 +1,15 @@
 import express from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
-import config from './utils/config.js'
-import { setupRoutes } from './blogRoutes.js'
+import {MONGODB_URI,PORT} from './utils/config.js'
+import { setupRoutes } from './controllers/blogs.js'
 
 const app = express()
 
 app.use(cors())
 app.use(express.json())
 
-mongoose.connect(config.MONGODB_URI, {
+mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -23,11 +23,5 @@ mongoose.connection.on('error', (error) => {
 })
 
 setupRoutes(app)
-
-const PORT = config.PORT || 3000
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`)
-})
 
 export default app
