@@ -26,6 +26,20 @@ router.post('/api/blogs', (request, response) => {
         response.status(201).json(result)
       })
 })
+
+
+router.delete('/api/blogs/:id', async (request, response, next) => {
+    const id = Number(request.params.id)
+    console.log(id)
+      const deletedBlog= await Blog.findOneAndDelete({ id })
+      if (!deletedBlog) {
+        response.status(404).json({ error: "blog was not found" })
+      }
+      else{
+        response.status(204).json({ error: "blog deleted" })
+      }
+})
+
   
 export const setupRoutes = (app) => {
   app.use(router)

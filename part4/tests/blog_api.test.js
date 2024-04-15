@@ -42,10 +42,11 @@ test('testing for unique id', async () => {
 
 test('posting new blog is being tested',async () => {
   const newBlog = {
-    "title": "Sherlock Holmes",
-    "author": "Arthur Conan Doyle",
-    "url": "https://en.wikipedia.org/wiki/Sherlock_Holmes",
-    "likes": 3000
+    title: "Sherlock Holmes",
+    author: "Arthur Conan Doyle",
+    url: "https://en.wikipedia.org/wiki/Sherlock_Holmes",
+    likes: 3000,
+    id:4
   }
   await api
   .post('/api/blogs')
@@ -56,9 +57,10 @@ test('posting new blog is being tested',async () => {
 
 test('posting new blog without like is being tested',async () => {
   const newBlog = {
-    "title": "Sherlock Holmes",
-    "author": "Arthur Conan Doyle",
-    "url": "https://en.wikipedia.org/wiki/Sherlock_Holmes",
+    title: "Sherlock Holmes",
+    author: "Arthur Conan Doyle",
+    url: "https://en.wikipedia.org/wiki/Sherlock_Holmes",
+    id:4
   }
 
   if (!Object.keys(newBlog).includes('likes')) {
@@ -80,15 +82,17 @@ test('posting new blog without like is being tested',async () => {
 
 test('testing for bad request', async () => {
   const noTitle = {
-    "author": "Arthur Conan Doyle",
-    "url": "https://sherlockholmes.com",
-    "likes":100
+    author: "Arthur Conan Doyle",
+    url: "https://sherlockholmes.com",
+    likes:100,
+    id:4
   }
 
   const noUrl = {
-    "title": "The Adventures of Sherlock Holmes",
-    "author": "Arthur Conan Doyle",
-    "likes":100
+    title: "The Adventures of Sherlock Holmes",
+    author: "Arthur Conan Doyle",
+    likes:100,
+    id:4
   }
 
   await api
@@ -103,6 +107,10 @@ test('testing for bad request', async () => {
 })
 
 
+test('testing delete', async () => {
+  await api.delete(`/api/blogs/100`).expect(404)
+  await api.delete(`/api/blogs/3`).expect(204)
+})
 
 
 after(async () => {
