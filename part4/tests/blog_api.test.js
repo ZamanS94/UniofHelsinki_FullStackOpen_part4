@@ -32,6 +32,13 @@ test('all blogs are returned', async () => {
    assert.strictEqual(response.body.length, initialBlogs.length)
 })
 
+test('testing for unique id', async () => {
+ const singleID = await nonExistingId()
+ const blogsDB = await blogsInDb()
+ const nonEqual = blogsDB.every(blog => blog.id !== singleID)
+ assert.strictEqual(nonEqual, true)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })

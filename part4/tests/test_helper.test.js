@@ -25,12 +25,18 @@ const nonExistingId = async () => {
   const blog = new Blog({ title: 'willremovethissoon', author: 'Temporary Author',likes: 0 })
   await blog.save()
   await blog.deleteOne()
-  return note._id.toString()
+  return blog._id.toString()
 }
 
 const blogsInDb = async () => {
   const blogs = await Blog.find({})
-  return blogs.map(blog => blog.toJSON())
+  return blogs.map(blog => {
+    const nesBlogs = blog.toJSON()
+    nesBlogs.id = nesBlogs._id.toString()
+    delete nesBlogs._id
+    delete nesBlogs.__v
+    return nesBlogs
+  })
 }
 
 export {
