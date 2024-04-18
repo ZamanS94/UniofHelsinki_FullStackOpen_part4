@@ -19,11 +19,12 @@ router.post('/api/users', async (request, response) => {
 
   const saltRounds = 10
   const passwordH = await bcrypt.hash(password, saltRounds)
+  console.log(passwordH)
 
   const user = new User({
     username,
     name,
-    passwordH
+    hashedPassword
   })
 
   const savedUser = await user.save()
