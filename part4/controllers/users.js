@@ -18,8 +18,7 @@ router.post('/api/users', async (request, response) => {
   }
 
   const saltRounds = 10
-  const passwordH = await bcrypt.hash(password, saltRounds)
-  console.log(passwordH)
+  const hashedPassword = await bcrypt.hash(password, saltRounds)
 
   const user = new User({
     username,
