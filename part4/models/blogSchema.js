@@ -5,7 +5,12 @@ const blogSchema = new mongoose.Schema({
   author: String,
   url: String,
   likes: Number,
-  id: Number
+  id: Number,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 })
+
 
 export const Blog = mongoose.model('Blog', blogSchema)

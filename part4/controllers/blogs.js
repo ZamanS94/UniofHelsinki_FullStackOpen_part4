@@ -1,30 +1,64 @@
-import { Router } from 'express'
+import express from 'express'
 import { Blog } from '../models/blogSchema.js'
+import { User } from '../models/userSchema.js'
 
-const router = Router()
-
-router.get('/api/blogs', (request, response) => {
-  Blog
-    .find({})
-    .then(blogs => {
-      response.json(blogs)
-    })
-})
+const router = express.Router()
 
 router.get('/', async (request, response) => {
-    response.send('Hi there!')
+  response.send('Hi there!')
+})
+
+router.get('/api/blogs', async (request, response) => {
+  try {
+    const blogs = await Blog
+      .find({})
+      .populate('user')
+
+    const newBlogs = blogs.map(blog => {
+      return {
+        url: blog.url,
+        title: blog.title,
+        author: blog.author,
+        user: {
+          username: blog.user.username,
+          name: blog.user.name,
+          id: blog.user._id
+        },
+        likes: blog.likes,
+        id: blog._id
+      }
+    })
+    response.json(newBlogs)
+  } catch (error) {
+    response.status(500).json({ error: "Internal Server Error" })
+  }
+})
+
+router.post('/api/blogs', async (request, response) => {
+  const body = request.body
+  console.log(body.userId)
+
+  const user = await User.findById(body.userId)
+  console.log(user._id)
+
+  const blog = new Blog({
+    url: body.url,
+    title: body.title,
+    author: body.author,
+    user: user._id,
+    likes: body.likes,
+    id: body._id,
   })
-  
-router.post('/api/blogs', (request, response) => {
-    const { title, url } = request.body
-    if (!title || !url) {
-      return response.status(400).json({ error: "Title or URL is missing" })
-    }
-    const blog = new Blog(request.body)
-    blog.save()
-      .then(result => {
-        response.status(201).json(result)
-      })
+
+  try {
+    const savedBlog = await blog.save()
+    user.blog = user.blog.concat(savedBlog._id)
+    await user.save()
+    console.log(user.blog)
+    response.status(201).json(savedBlog)
+  } catch (error) {
+    response.status(500).send('Internal Server Error')
+  }
 })
 
 

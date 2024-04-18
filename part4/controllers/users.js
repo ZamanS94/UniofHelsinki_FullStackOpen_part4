@@ -1,18 +1,39 @@
 import bcrypt from 'bcrypt'
 import express from 'express'
+import { Blog } from '../models/blogSchema.js'
 import { User } from '../models/userSchema.js'
 
-const router = express.Router()
 
+const router = express.Router()
 router.get('/api/users', async (request, response) => {
   try {
-    const users = await User.find({})
-    response.json(users)
+    const users = await User
+      .find({})
+      .populate('blog')
+
+    const newUsers = users.map(user => {
+      return {
+        blog: user.blog.map(blog_ => {
+          return {
+            url: blog_.url,
+            title: blog_.title,
+            author: blog_.author,
+            id: blog_._id
+          }
+        }),
+        id: user._id,
+        name: user.name,
+        username: user.username
+      }
+    })
+    response.json(newUsers)
   } catch (error) {
-    console.error(error.message)
-    response.status(500).send('Internal Server Error')
+    console.error("Error fetching users:", error)
+    response.status(500).json({ error: "Internal Server Error" })
   }
 })
+
+
 
 router.post('/api/users', async (request, response) => {
   const { username, name, password } = request.body
@@ -25,7 +46,6 @@ router.post('/api/users', async (request, response) => {
   if (username.length < 3 || password.length < 3) {
     return response.status(400).json({ error: 'Username and password length must be 3' })
   }
-
 
 
   const saltRounds = 10

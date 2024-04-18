@@ -11,7 +11,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         minLength: 3,
     },
-    hashedPassword: String
+    hashedPassword: String,
+    blog: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Blog'
+      }
+    ]
 })
 
+
 export const User = mongoose.model('User', userSchema)
+
