@@ -41,6 +41,62 @@ test('creation succeeds with a fresh username', async () => {
         assert(usernames.includes(newUser.username))
 })
 
+
+test('testing username less than 3 characters', async () => {
+    const newUser = {
+        username: 'ml',
+        name: 'Matti Luukkainen',
+        password: 'salainen',
+    }
+
+    await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+        .expect(res => {
+            assert.strictEqual(res.body.error, 'Username and password length must be 3')
+        })
+})
+
+test('testing password less than 3 characters', async () => {
+    const newUser = {
+        username: 'mluukkai',
+        name: 'Matti Luukkainen',
+        password: 'sa',
+    }
+
+    await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+        .expect(res => {
+            assert.strictEqual(res.body.error, 'Username and password length must be 3')
+        })
+})
+
+test('creation fails with existing username', async () => {
+    const users = await usersInDb()
+
+    const user0 = users[0]
+
+    const newUser = {
+        username: user0 .username,
+        name: user0.name,
+        password: 'password123',
+    }
+
+    await api
+        .post('/api/users')
+        .send(newUser)
+        .expect(500)
+        .expect('Content-Type', /application\/json/)
+        .expect(res => {
+            assert.strictEqual(res.body.error,'duplicate username error')
+        })
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
