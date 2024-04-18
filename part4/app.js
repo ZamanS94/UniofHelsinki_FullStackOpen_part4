@@ -3,6 +3,7 @@ import cors from 'cors'
 import mongoose from 'mongoose'
 import {MONGODB_URI,PORT} from './utils/config.js'
 import { setupRoutes } from './controllers/blogs.js'
+import {usersRouter} from './controllers/users.js'
 
 const app = express()
 
@@ -23,5 +24,6 @@ mongoose.connection.on('error', (error) => {
 })
 
 setupRoutes(app)
+usersRouter(app)
 
 export default app

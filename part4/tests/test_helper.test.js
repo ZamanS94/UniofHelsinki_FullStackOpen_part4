@@ -1,4 +1,6 @@
 import { Blog } from '../models/blogSchema.js'
+import { User } from '../models/userSchema.js'
+
 
 const initialBlogs = [
   {
@@ -43,8 +45,15 @@ const blogsInDb = async () => {
   })
 }
 
+const usersInDb = async () => {
+  const users = await User.find({})
+  return users.map(u => u.toJSON())
+}
+
 export {
   initialBlogs,
   nonExistingId,
-  blogsInDb
+  blogsInDb,
+  usersInDb
+
 }
