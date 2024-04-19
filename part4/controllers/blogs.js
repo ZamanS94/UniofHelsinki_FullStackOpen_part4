@@ -2,11 +2,28 @@ import express from 'express'
 import { Blog } from '../models/blogSchema.js'
 import { User } from '../models/userSchema.js'
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
 dotenv.config()
 
 const router = express.Router()
+
+const errorHandler = (error, request, response, next) => {
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  } else if (error.name === 'MongoServerError' && error.message.includes('E11000 duplicate key error')) {
+    return response.status(400).json({ error: 'expected `username` to be unique' })
+  } else if (error.name === 'JsonWebTokenError') {
+    return response.status(401).json({ error: 'invalid token' })
+  }
+
+  next(error)
+}
+
+
+
+router.use(errorHandler)
 
 router.get('/', async (request, response) => {
   response.send('Hi there!')
@@ -39,36 +56,61 @@ router.get('/api/blogs', async (request, response) => {
   }
 })
 
-router.post('/api/blogs', async (request, response) => {
 
-
-  const body = request.body
-  const user = await User.findById(body.userId)
-  if (!body.title || !body.url) {
-    return response.status(400).json({ error: 'Title and URL are required' })
-  }
-
-  const blog = new Blog({
-    url: body.url,
-    title: body.title,
-    author: body.author,
-    user: user._id,
-    likes: body.likes, 
-    id: body._id
-  })
-
+router.post('/api/blogs', async (request, response, next) => { 
   try {
-    const savedBlog = await blog.save()
-    user.blog = user.blog.concat(savedBlog._id)
-    await user.save()
-    response.status(201).json(savedBlog)
+    const getTokenFrom = request => {
+      const authorization = request.get('authorization')
+      if (authorization && authorization.startsWith('Bearer ')) {
+        return authorization.replace('Bearer ', '')
+      }
+      return null
+    }
+
+    const body = request.body
+    let decodedToken
+    try {
+      decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+    } catch (error) {
+      if (error.name === 'JsonWebTokenError') {
+        return response.status(401).json({ error: 'invalid token signature' })
+      }
+      throw error 
+    }
+
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
+    const user = await User.findById(decodedToken.id)
+
+    try {
+      if (!body.title || !body.url) {
+        throw new Error('title or url missing')
+      }
+
+      const blog = new Blog({
+        url: body.url,
+        title: body.title,
+        author: body.author,
+        user: user._id,
+        likes: body.likes, 
+        id: body._id
+      })
+
+      const savedBlog = await blog.save()
+      user.blog = user.blog.concat(savedBlog._id)
+      await user.save()
+      response.status(201).json(savedBlog)
+    } catch (error) {
+      return response.status(400).json({ error: error.message })
+    }
   } catch (error) {
-    response.status(500).send('Internal Server Error')
+    next(error)
   }
 })
 
 
-router.delete('/api/blogs/:id', async (request, response, next) => {
+router.delete('/api/blogs/:id', async (request, response) => {
     const id = Number(request.params.id)
     console.log(id)
       const deletedBlog= await Blog.findOneAndDelete({ id })
