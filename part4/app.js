@@ -4,6 +4,8 @@ import mongoose from 'mongoose'
 import {MONGODB_URI,PORT} from './utils/config.js'
 import { setupRoutes } from './controllers/blogs.js'
 import {usersRouter} from './controllers/users.js'
+import {loginRouter} from './controllers/login.js'
+
 
 const app = express()
 
@@ -25,5 +27,6 @@ mongoose.connection.on('error', (error) => {
 
 setupRoutes(app)
 usersRouter(app)
+loginRouter(app)
 
 export default app

@@ -1,6 +1,10 @@
 import express from 'express'
 import { Blog } from '../models/blogSchema.js'
 import { User } from '../models/userSchema.js'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const router = express.Router()
 
@@ -36,19 +40,20 @@ router.get('/api/blogs', async (request, response) => {
 })
 
 router.post('/api/blogs', async (request, response) => {
+
+
   const body = request.body
+  const user = await User.findById(body.userId)
   if (!body.title || !body.url) {
     return response.status(400).json({ error: 'Title and URL are required' })
   }
 
-  const user = await User.findById(body.userId)
-
   const blog = new Blog({
     url: body.url,
     title: body.title,
-    author: body.author || '',
+    author: body.author,
     user: user._id,
-    likes: body.likes || 0, 
+    likes: body.likes, 
     id: body._id
   })
 
