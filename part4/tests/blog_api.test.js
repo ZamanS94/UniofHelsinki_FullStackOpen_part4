@@ -1,23 +1,45 @@
-import { test, after, beforeEach} from 'node:test'
+import { test, after, beforeEach } from 'node:test'
 import assert from 'node:assert'
 import supertest from 'supertest'
 import app from '../app.js'
-import  {initialBlogs,nonExistingId,blogsInDb} from './test_helper.test.js'
+import { initialBlogs, nonExistingId, blogsInDb } from './test_helper.test.js'
 import mongoose from 'mongoose'
 import { Blog } from '../models/blogSchema.js'
+import bcrypt from 'bcrypt'
+import { usersInDb } from './test_helper.test.js'
+import { User } from '../models/userSchema.js'
 
 const api = supertest(app)
 
-
 beforeEach(async () => {
+  await User.deleteMany({})
   await Blog.deleteMany({})
-  let BlogObject = new Blog(initialBlogs[0])
+  const existingUser = await User.findOne({ username: 'root' })
+
+  if (!existingUser) {
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', name: 'root', passwordHash })
+    await user.save()
+  }
+  const usersAtStart = await usersInDb()
+
+  let BlogObject = new Blog({
+    ...initialBlogs[0],
+    user: usersAtStart[0]._id 
+  })
   await BlogObject.save()
-  BlogObject = new Blog(initialBlogs[1])
+  BlogObject = new Blog({
+    ...initialBlogs[1],
+    user: usersAtStart[0]._id 
+  })
   await BlogObject.save()
-  BlogObject = new Blog(initialBlogs[2])
+  BlogObject = new Blog({
+    ...initialBlogs[2],
+    user: usersAtStart[0]._id 
+  })
   await BlogObject.save()
-  
+
+
 })
 
 test('blogs are returned as json', async () => {
@@ -41,12 +63,15 @@ test('testing for unique id', async () => {
 
 
 test('posting new blog is being tested',async () => {
+  const usersAtStart = await usersInDb()
+  console.log(usersAtStart[0])
   const newBlog = {
     title: "Sherlock Holmes",
     author: "Arthur Conan Doyle",
     url: "https://en.wikipedia.org/wiki/Sherlock_Holmes",
     likes: 3000,
-    id:4
+    id:4,
+    userId:usersAtStart[0]._id
   }
   await api
   .post('/api/blogs')
@@ -56,11 +81,13 @@ test('posting new blog is being tested',async () => {
 })
 
 test('posting new blog without like is being tested',async () => {
+  const usersAtStart = await usersInDb()
   const newBlog = {
     title: "Sherlock Holmes",
     author: "Arthur Conan Doyle",
     url: "https://en.wikipedia.org/wiki/Sherlock_Holmes",
-    id:4
+    id:4,
+    userId:usersAtStart[0]._id
   }
 
   if (!Object.keys(newBlog).includes('likes')) {
@@ -81,18 +108,21 @@ test('posting new blog without like is being tested',async () => {
 
 
 test('testing for bad request', async () => {
+  const usersAtStart = await usersInDb()
   const noTitle = {
     author: "Arthur Conan Doyle",
     url: "https://sherlockholmes.com",
     likes:100,
-    id:4
+    id:4,
+    userId:usersAtStart[0]._id
   }
 
   const noUrl = {
     title: "The Adventures of Sherlock Holmes",
     author: "Arthur Conan Doyle",
     likes:100,
-    id:4
+    id:4,
+    user:usersAtStart[0]._id
   }
 
   await api

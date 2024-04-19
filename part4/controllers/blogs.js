@@ -28,33 +28,34 @@ router.get('/api/blogs', async (request, response) => {
         id: blog._id
       }
     })
-    response.json(newBlogs)
+    response.status(200).json(newBlogs)
   } catch (error) {
+    console.log(error.body)
     response.status(500).json({ error: "Internal Server Error" })
   }
 })
 
 router.post('/api/blogs', async (request, response) => {
   const body = request.body
-  console.log(body.userId)
+  if (!body.title || !body.url) {
+    return response.status(400).json({ error: 'Title and URL are required' })
+  }
 
   const user = await User.findById(body.userId)
-  console.log(user._id)
 
   const blog = new Blog({
     url: body.url,
     title: body.title,
-    author: body.author,
+    author: body.author || '',
     user: user._id,
-    likes: body.likes,
-    id: body._id,
+    likes: body.likes || 0, 
+    id: body._id
   })
 
   try {
     const savedBlog = await blog.save()
     user.blog = user.blog.concat(savedBlog._id)
     await user.save()
-    console.log(user.blog)
     response.status(201).json(savedBlog)
   } catch (error) {
     response.status(500).send('Internal Server Error')
