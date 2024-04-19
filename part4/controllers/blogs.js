@@ -3,6 +3,7 @@ import errorHandler from '../middleware/errorHandler.js'
 import authenticateToken from '../middleware/tokenAuthorization.js'
 import { Blog } from '../models/blogSchema.js'
 import { User } from '../models/userSchema.js'
+import mongoose from 'mongoose'
 
 const router = express.Router()
 
@@ -52,7 +53,7 @@ router.post('/api/blogs', authenticateToken, async (request, response) => {
       author: body.author,
       user: user._id,
       likes: body.likes,
-      id: body._id
+      id: body.id
     })
 
     const savedBlog = await blog.save()
@@ -64,28 +65,66 @@ router.post('/api/blogs', authenticateToken, async (request, response) => {
   }
 })
 
-router.delete('/api/blogs/:id', async (request, response) => {
-  const id = Number(request.params.id)
-  const deletedBlog = await Blog.findOneAndDelete({ id })
-  if (!deletedBlog) {
-    response.status(404).send("blog was not found")
-  } else {
-    response.status(204).send("blog deleted")
+router.delete('/api/blogs/:id', authenticateToken, async (request, response) => {
+  try {
+    const userId = request.user._id
+    const blogId = request.params.id
+
+    if (!mongoose.isValidObjectId(blogId)) {
+      return response.status(400).json({ error: "invalid id" })
+    }
+
+    const blog = await Blog.findById(blogId)
+
+    if (!blog) {
+      return response.status(404).json({ error: "blog not found" })
+    }
+    if (blog.user.equals(userId)) {
+      await Blog.findOneAndDelete({ _id: blogId })
+      response.status(204).json({ message: "blog deleted" })
+    }
+    else{
+      return response.status(403).json({ error: "can't delete the blog" });
+    } 
+  } catch (error) {
+    response.status(500).json({ error: error.message })
   }
 })
 
+
+
 router.put('/api/blogs/:id', async (request, response) => {
-  const id_ = request.params.id
-  const body = request.body
-  const updatedPerson = await Blog.findOneAndUpdate(
-    { id: id_ }, body, { new: true, runValidators: true }
-  )
-  if (!updatedPerson) {
-    response.status(404).send("blog was not found")
-  } else {
-    response.status(201).send("blog updated")
+
+  try {
+    const userId = request.user._id
+    const blogId = request.params.id
+    const body = request.body
+
+    if (!mongoose.isValidObjectId(blogId)) {
+      return response.status(400).json({ error: "invalid id" })
+    }
+
+    const blog = await Blog.findById(blogId)
+
+    if (!blog) {
+      return response.status(404).json({ error: "Blog not found" })
+    }
+    if (!blog.user.equals(userId)) {
+      return response.status(403).json({ error: "can't edit the blog" })
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(blogId, body, { new: true, runValidators: true })
+
+    if (!updatedBlog) {
+      return response.status(404).send("Blog not found")
+    }
+
+    response.status(200).json(updatedBlog)
+  } catch (error) {
+    response.status(500).json({ error: error.message })
   }
 })
+
 
 export const setupRoutes = (app) => {
   app.use(router)
