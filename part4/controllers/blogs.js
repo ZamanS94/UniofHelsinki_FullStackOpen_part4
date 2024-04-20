@@ -1,6 +1,6 @@
 import express from 'express'
 import errorHandler from '../middleware/errorHandler.js'
-import authenticateToken from '../middleware/tokenAuthorization.js'
+import { authenticateToken, userExtractor }from '../middleware/tokenAuthorization.js'
 import { Blog } from '../models/blogSchema.js'
 import { User } from '../models/userSchema.js'
 import mongoose from 'mongoose'
@@ -8,6 +8,10 @@ import mongoose from 'mongoose'
 const router = express.Router()
 
 router.use(errorHandler)
+router.use(authenticateToken)
+router.use(userExtractor)
+
+
 
 router.get('/', async (request, response) => {
   response.send('Hi there!')
@@ -41,11 +45,11 @@ router.get('/api/blogs', async (request, response) => {
 router.post('/api/blogs', authenticateToken, async (request, response) => {
   try {
     const body = request.body
-    const user = await User.findById(request.user._id)
 
     if (!body.title || !body.url) {
       throw new Error('title or url missing')
     }
+    const user = await User.findById(request.user._id)
 
     const blog = new Blog({
       url: body.url,
@@ -84,13 +88,12 @@ router.delete('/api/blogs/:id', authenticateToken, async (request, response) => 
       response.status(204).json({ message: "blog deleted" })
     }
     else{
-      return response.status(403).json({ error: "can't delete the blog" });
+      return response.status(403).json({ error: "can't delete the blog" })
     } 
   } catch (error) {
     response.status(500).json({ error: error.message })
   }
 })
-
 
 
 router.put('/api/blogs/:id', async (request, response) => {

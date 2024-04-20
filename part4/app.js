@@ -1,11 +1,10 @@
 import express from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
-import {MONGODB_URI,PORT} from './utils/config.js'
+import { MONGODB_URI } from './utils/config.js'
 import { setupRoutes } from './controllers/blogs.js'
-import {usersRouter} from './controllers/users.js'
-import {loginRouter} from './controllers/login.js'
-
+import { usersRouter } from './controllers/users.js'
+import { loginRouter } from './controllers/login.js'
 
 const app = express()
 
