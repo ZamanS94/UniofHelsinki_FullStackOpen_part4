@@ -51,12 +51,20 @@ router.post('/api/blogs', authenticateToken, async (request, response) => {
     }
     const user = await User.findById(request.user._id)
 
+    let likes = 0
+    if (body.hasOwnProperty('likes')) {
+      likes = body.likes
+    }
+    else{
+      likes=0
+    }
+
     const blog = new Blog({
       url: body.url,
       title: body.title,
       author: body.author,
       user: user._id,
-      likes: body.likes,
+      likes: likes,
       id: body.id
     })
 

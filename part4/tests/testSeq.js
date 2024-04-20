@@ -1,6 +1,6 @@
 import { execSync } from 'child_process'
 
-const testFiles = ['./tests/blog_api.test.js', './tests/user_api.test.js']
+const testFiles = ['./tests/user_api.test.js','./tests/blog_api.test.js']
 
 
 testFiles.forEach(testFile => {
