@@ -7,9 +7,9 @@ dotenv.config()
 
 const router = Router()
 
-router.post('/login', async (request, response) => {
+router.post('/api/login', async (request, response) => {
     const { username, password } = request.body
-
+    console.log(password)
     const user = await User.findOne({ username })
     if (!user) {
         return response.status(401).json({
@@ -17,7 +17,8 @@ router.post('/login', async (request, response) => {
         })
     }
 
-    const passwordCorrect = bcrypt.compare(password, user.hashedPassword)
+    const passwordCorrect = user === null ? false : await bcrypt.compare(password, user.hashedPassword)
+    console.log(passwordCorrect)
     if (!passwordCorrect) {
         return response.status(401).json({
             error: 'invalid password'

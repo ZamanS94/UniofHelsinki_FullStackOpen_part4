@@ -4,14 +4,13 @@ import { authenticateToken, userExtractor }from '../middleware/tokenAuthorizatio
 import { Blog } from '../models/blogSchema.js'
 import { User } from '../models/userSchema.js'
 import mongoose from 'mongoose'
+import { log } from 'console'
 
 const router = express.Router()
 
 router.use(errorHandler)
 router.use(authenticateToken)
 router.use(userExtractor)
-
-
 
 router.get('/', async (request, response) => {
   response.send('Hi there!')
@@ -105,10 +104,9 @@ router.delete('/api/blogs/:id', authenticateToken, async (request, response) => 
 
 
 router.put('/api/blogs/:id', async (request, response) => {
-
   try {
-    const userId = request.user._id
-    const blogId = request.params.id
+    const userId = request.body.user && request.body.user.id ? request.body.user.id : request.body.user;
+    const blogId = request.body.id
     const body = request.body
 
     if (!mongoose.isValidObjectId(blogId)) {
@@ -120,11 +118,21 @@ router.put('/api/blogs/:id', async (request, response) => {
     if (!blog) {
       return response.status(404).json({ error: "Blog not found" })
     }
+
     if (!blog.user.equals(userId)) {
       return response.status(403).json({ error: "can't edit the blog" })
     }
 
-    const updatedBlog = await Blog.findByIdAndUpdate(blogId, body, { new: true, runValidators: true })
+    delete body.id
+
+    if (body.user) {
+      delete body.user
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(blogId, body, {
+      new: true,
+      runValidators: true
+    })
 
     if (!updatedBlog) {
       return response.status(404).send("Blog not found")
